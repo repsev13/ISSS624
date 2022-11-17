@@ -26,5 +26,26 @@
     "title": "Hands-On Exercise 1",
     "section": "Getting Started",
     "text": "Getting Started\nThis is the getting started paragraph"
+  },
+  {
+    "objectID": "HandsOnEx1/Hands-On_Ex1.html",
+    "href": "HandsOnEx1/Hands-On_Ex1.html",
+    "title": "Hands-On Exercise 1: Geospatial Data Wrangling with R",
+    "section": "",
+    "text": "In this hands-on exercise, I learnt how to import and wrangle geospatial data using appropriate R packages."
+  },
+  {
+    "objectID": "HandsOnEx1/Hands-On_Ex1.html#getting-started",
+    "href": "HandsOnEx1/Hands-On_Ex1.html#getting-started",
+    "title": "Hands-On Exercise 1: Geospatial Data Wrangling with R",
+    "section": "Getting Started",
+    "text": "Getting Started\nThe code chunk below installs and loads sf and tidyverse into R environment.\n\npacman::p_load(sf,tidyverse)"
+  },
+  {
+    "objectID": "HandsOnEx1/Hands-On_Ex1.html#importing-geospatial-data",
+    "href": "HandsOnEx1/Hands-On_Ex1.html#importing-geospatial-data",
+    "title": "Hands-On Exercise 1: Geospatial Data Wrangling with R",
+    "section": "Importing Geospatial Data",
+    "text": "Importing Geospatial Data\n\nImport Polygon Feature Data\n\nmpsz = st_read(dsn = \"data/geospatial\", layer = \"MP14_SUBZONE_WEB_PL\")\n\nReading layer `MP14_SUBZONE_WEB_PL' from data source \n  `C:\\Users\\lynnk\\Desktop\\School\\AGA\\Pre-Lesson\\repsev13\\ISSS624\\HandsOnEx1\\data\\geospatial' \n  using driver `ESRI Shapefile'\nSimple feature collection with 323 features and 15 fields\nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 2667.538 ymin: 15748.72 xmax: 56396.44 ymax: 50256.33\nProjected CRS: SVY21\n\n\n\n\nImporting polyline feature data"
   }
 ]
