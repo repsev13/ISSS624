@@ -312,7 +312,7 @@ tm_shape(mpsz_pop2020)+
 
 ##### Plotting choropleth maps with built-in classification methods
 
-Quantile Data Classification
+Natural Breaks (Jenks) Data Classification Method
 
 ```{r}
 tm_shape(mpsz_pop2020)+
@@ -334,7 +334,129 @@ tm_shape(mpsz_pop2020)+
 
 Prepare choropleth maps by using different classification methods supported by tmap and compare their differences
 
+-   Pretty Data Classification Method
+
+    ```{r}
+    tm_shape(mpsz_pop2020)+
+      tm_fill("DEPENDENCY",
+              n = 5,
+              style = "pretty")+
+      tm_borders(alpha = 0.5)
+    ```
+
+-   Quantile Data Classification Method
+
+    ```{r}
+    tm_shape(mpsz_pop2020)+
+      tm_fill("DEPENDENCY",
+              n = 5,
+              style = "quantile")+
+      tm_borders(alpha = 0.5)
+    ```
+
+-   Kmeans Data Classification Method
+
+    ```{r}
+    tm_shape(mpsz_pop2020)+
+      tm_fill("DEPENDENCY",
+              n = 5,
+              style = "kmeans")+
+      tm_borders(alpha = 0.5)
+    ```
+
+-   Standard Deviation Data Classification Method
+
+    ```{r}
+    tm_shape(mpsz_pop2020)+
+      tm_fill("DEPENDENCY",
+              n = 5,
+              style = "sd")+
+      tm_borders(alpha = 0.5)
+    ```
+
+-   Hierarchical Clustering Data Classification Method
+
+    ```{r}
+    tm_shape(mpsz_pop2020)+
+      tm_fill("DEPENDENCY",
+              n = 5,
+              style = "hclust")+
+      tm_borders(alpha = 0.5)
+    ```
+
+-   Fisher Data Classification Method
+
+    ```{r}
+    tm_shape(mpsz_pop2020)+
+      tm_fill("DEPENDENCY",
+              n = 5,
+              style = "fisher")+
+      tm_borders(alpha = 0.5)
+    ```
+
+-   Data Classification Method (dpih)
+
+    ```{r}
+    tm_shape(mpsz_pop2020)+
+      tm_fill("DEPENDENCY",
+              n = 5,
+              style = "dpih")+
+      tm_borders(alpha = 0.5)
+    ```
+
+-   Data Classification Method (headtails)
+
+    ```{r}
+    tm_shape(mpsz_pop2020)+
+      tm_fill("DEPENDENCY",
+              n = 5,
+              style = "headtails")+
+      tm_borders(alpha = 0.5)
+    ```
+
 Preparing choropleth maps by using similar classification method but with different numbers of classes (i.e. 2, 6, 10, 20). Compare the output maps, what observation can you draw?
+
+*As observed from below, the different number of classes would break the dependencies into more categories. It makes the map more informative at first glance. However, the difference between 10 classes and 20 classes is not significant. As such, a maximum of 10 classes would suffice.*
+
+-   2 classes
+
+    ```{r}
+    tm_shape(mpsz_pop2020)+
+      tm_fill("DEPENDENCY",
+              n = 2,
+              style = "quantile")+
+      tm_borders(alpha = 0.5)
+    ```
+
+-   6 classes
+
+    ```{r}
+    tm_shape(mpsz_pop2020)+
+      tm_fill("DEPENDENCY",
+              n = 6,
+              style = "quantile")+
+      tm_borders(alpha = 0.5)
+    ```
+
+-   10 classes
+
+    ```{r}
+    tm_shape(mpsz_pop2020)+
+      tm_fill("DEPENDENCY",
+              n = 10,
+              style = "quantile")+
+      tm_borders(alpha = 0.5)
+    ```
+
+-   20 classes
+
+    ```{r}
+    tm_shape(mpsz_pop2020)+
+      tm_fill("DEPENDENCY",
+              n = 20,
+              style = "quantile")+
+      tm_borders(alpha = 0.5)
+    ```
 
 #### Plotting choropleth map with custome break
 
