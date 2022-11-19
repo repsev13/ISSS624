@@ -1,0 +1,14 @@
+---
+title: "In-Class Exercise"
+editor: visual
+---
+
+# Overview 
+
+Getting Started
+
+The code chunk below will install and load tidyverse and sf packages
+
+```{r}
+pacman::p_load(sf, tidyverse)
+```

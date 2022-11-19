@@ -517,7 +517,7 @@ tm_shape(mpsz_pop2020)+
   tm_borders(alpha = 0.5)
 ```
 
-##### Map Style 
+##### Map Style
 
 ```{r}
 tm_shape(mpsz_pop2020)+
