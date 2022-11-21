@@ -12,7 +12,10 @@ website:
           - text: Hands-On Exercise 2
             href: HandsOnEx2/HandsOnEx2.qmd
 
-
+      - text: In-Class Exercises
+        menu: 
+          - text: In-Class Exercise 1
+          - href: InClassEx1/InClassEx1.qmd
 
     right:
       - href: index.qmd
