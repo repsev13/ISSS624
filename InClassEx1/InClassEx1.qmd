@@ -5,6 +5,8 @@ editor: visual
 
 ## Overview
 
+In this section, I learnt how to compute spatial weights using R.
+
 ## Getting Started
 
 The code chunk below will install and load sf, tidyverse, spdep, and tmap packages.
