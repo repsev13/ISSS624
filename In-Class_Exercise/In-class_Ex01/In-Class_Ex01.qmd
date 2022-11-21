@@ -1,5 +1,5 @@
 ---
-title: "In-Class Exercise"
+title: "In-Class Exercise 1"
 editor: visual
 ---
 
