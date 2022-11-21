@@ -2,8 +2,6 @@
 title: "About"
 ---
 
-About this site
+## About this site
 
-```{r}
-1 + 1
-```
+This site documents my learning journey for Applied Geospatial Analytics
