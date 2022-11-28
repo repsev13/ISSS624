@@ -319,21 +319,21 @@
     "href": "InClassEx2/InClassEx2.html#importing-geospatial-data",
     "title": "In-Class Exercise 2",
     "section": "Importing Geospatial Data",
-    "text": "Importing Geospatial Data\n\nwp <- st_read(dsn = \"geodata\",\n              layer = \"geo_export\",\n              crs = 4326) %>%\n  filter(clean_coun == \"Nigeria\")\n\nReading layer `geo_export' from data source \n  `C:\\Users\\lynnk\\Desktop\\School\\AGA\\Pre-Lesson\\repsev13\\ISSS624\\InClassEx2\\geodata' \n  using driver `ESRI Shapefile'\n\n\nWarning: st_crs<- : replacing crs does not reproject data; use st_transform for\nthat\n\n\nSimple feature collection with 293223 features and 72 fields\nGeometry type: POINT\nDimension:     XY\nBounding box:  xmin: -91.75435 ymin: -27.31495 xmax: 92.32694 ymax: 26.65254\nGeodetic CRS:  WGS 84\n\n\n\nwrite_rds(wp, \"geodata/wp_nga.rds\")\n\nImporting Nigeria LGA boundary data\n\nnga <- st_read(dsn = \"geodata\",\n               layer = \"NGA\",\n               crs = 4326)\n\nReading layer `NGA' from data source \n  `C:\\Users\\lynnk\\Desktop\\School\\AGA\\Pre-Lesson\\repsev13\\ISSS624\\InClassEx2\\geodata' \n  using driver `ESRI Shapefile'\nSimple feature collection with 774 features and 5 fields\nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 2.668534 ymin: 4.273007 xmax: 14.67882 ymax: 13.89442\nGeodetic CRS:  WGS 84"
+    "text": "Importing Geospatial Data\n\nwp <- st_read(dsn = \"geodata\",\n              layer = \"geo_export\",\n              crs = 4326) %>%\n  filter(clean_coun == \"Nigeria\")\n\n\nwrite_rds(wp, \"geodata/wp_nga.rds\")\n\nImporting Nigeria LGA boundary data\n\nnga <- st_read(dsn = \"geodata\",\n               layer = \"NGA\",\n               crs = 4326)"
   },
   {
     "objectID": "InClassEx2/InClassEx2.html#data-wrangling",
     "href": "InClassEx2/InClassEx2.html#data-wrangling",
     "title": "In-Class Exercise 2",
     "section": "Data Wrangling",
-    "text": "Data Wrangling\n\nRecoding NA values into string\n\nwp_nga <- read_rds(\"geodata/wp_nga.rds\") %>%\n    mutate(status_cle = replace_na(status_cle, \"Unknown\"))\n\n\n\nEDA\n\nfreq(data=wp_nga, \n     input = 'status_cle')\n\nWarning: The `<scale>` argument of `guides()` cannot be `FALSE`. Use \"none\" instead as\nof ggplot2 3.3.4.\nℹ The deprecated feature was likely used in the funModeling package.\n  Please report the issue at <https://github.com/pablo14/funModeling/issues>.\n\n\n\n\n\n                        status_cle frequency percentage cumulative_perc\n1                       Functional     45883      48.29           48.29\n2                   Non-Functional     29385      30.93           79.22\n3                          Unknown     10656      11.22           90.44\n4      Functional but needs repair      4579       4.82           95.26\n5 Non-Functional due to dry season      2403       2.53           97.79\n6        Functional but not in use      1686       1.77           99.56\n7         Abandoned/Decommissioned       234       0.25           99.81\n8                        Abandoned       175       0.18           99.99\n9 Non functional due to dry season         7       0.01          100.00"
+    "text": "Data Wrangling\n\nRecoding NA values into string\n\nwp_nga <- read_rds(\"geodata/wp_nga.rds\") %>%\n    mutate(status_cle = replace_na(status_cle, \"Unknown\"))\n\n\n\nEDA\n\nfreq(data=wp_nga, \n     input = 'status_cle')"
   },
   {
     "objectID": "InClassEx2/InClassEx2.html#extracting-water-point-data",
     "href": "InClassEx2/InClassEx2.html#extracting-water-point-data",
     "title": "In-Class Exercise 2",
     "section": "Extracting Water Point Data",
-    "text": "Extracting Water Point Data\n\nExtracting functional water point\n\nwpt_functional <- wp_nga %>%\n  filter(status_cle %in%\n           c(\"Functional\", \n             \"Functional but not in use\",\n             \"Functional but needs repair\"))\n\n\nfreq(data=wpt_functional, \n     input = 'status_cle')\n\n\n\n\n                   status_cle frequency percentage cumulative_perc\n1                  Functional     45883      87.99           87.99\n2 Functional but needs repair      4579       8.78           96.77\n3   Functional but not in use      1686       3.23          100.00\n\n\n\n\nExtracting non-functional water point\n\nwpt_nonfunctional <- wp_nga %>%\n  filter(status_cle %in%\n           c(\"Abandoned/Decommissioned\", \n             \"Abandoned\",\n             \"Non-Functional\",\n             \"Non functional due to dry season\",\n             \"Non-Functional due to dry season\"))\n\n\nfreq(data=wpt_nonfunctional, \n     input = 'status_cle')\n\n\n\n\n                        status_cle frequency percentage cumulative_perc\n1                   Non-Functional     29385      91.25           91.25\n2 Non-Functional due to dry season      2403       7.46           98.71\n3         Abandoned/Decommissioned       234       0.73           99.44\n4                        Abandoned       175       0.54           99.98\n5 Non functional due to dry season         7       0.02          100.00\n\n\n\n\nExtracting water point with Unknown class\n\nwpt_unknown <- wp_nga %>%\n  filter(status_cle == \"Unknown\")"
+    "text": "Extracting Water Point Data\n\nExtracting functional water point\n\nwpt_functional <- wp_nga %>%\n  filter(status_cle %in%\n           c(\"Functional\", \n             \"Functional but not in use\",\n             \"Functional but needs repair\"))\n\n\nfreq(data=wpt_functional, \n     input = 'status_cle')\n\n\n\nExtracting non-functional water point\n\nwpt_nonfunctional <- wp_nga %>%\n  filter(status_cle %in%\n           c(\"Abandoned/Decommissioned\", \n             \"Abandoned\",\n             \"Non-Functional\",\n             \"Non functional due to dry season\",\n             \"Non-Functional due to dry season\"))\n\n\nfreq(data=wpt_nonfunctional, \n     input = 'status_cle')\n\n\n\nExtracting water point with Unknown class\n\nwpt_unknown <- wp_nga %>%\n  filter(status_cle == \"Unknown\")"
   },
   {
     "objectID": "InClassEx2/InClassEx2.html#performing-point-in-polygon-count",
@@ -347,6 +347,13 @@
     "href": "InClassEx2/InClassEx2.html#saving-the-analytical-data-table",
     "title": "In-Class Exercise 2",
     "section": "Saving the Analytical Data Table",
-    "text": "Saving the Analytical Data Table\n\nnga_wp <- nga_wp %>%\n  mutate(pct_functional = `wpt functional`/`total wpt`) %>%\n  mutate(`pct_non-functional` = `wpt non-functional`/`total wpt`) %>%\n  select(3:4, 9:10)\n\n\nwrite_rds(nga_wp, \"geodata/nga_wp.rds\")"
+    "text": "Saving the Analytical Data Table\n\nnga_wp <- nga_wp %>%\n  mutate(pct_functional = `wpt functional`/`total wpt`) %>%\n  mutate(`pct_non-functional` = `wpt non-functional`/`total wpt`)\n\n\nwrite_rds(nga_wp, \"geodata/nga_wp.rds\")"
+  },
+  {
+    "objectID": "InClassEx2/InClassEx2.html#visualising-the-spatial-distribution-of-water-points",
+    "href": "InClassEx2/InClassEx2.html#visualising-the-spatial-distribution-of-water-points",
+    "title": "In-Class Exercise 2",
+    "section": "Visualising the spatial distribution of water points",
+    "text": "Visualising the spatial distribution of water points\n\nnga_wp <- read_rds(\"geodata/nga_wp.rds\")\ntotal <- qtm(nga_wp, \"total wpt\")\nwp_functional <- qtm(nga_wp, \"wpt functional\")\nwp_nonfunctional <- qtm(nga_wp, \"wpt non-functional\")\nunknown <- qtm(nga_wp, \"wpt unknown\")\n\ntmap_arrange(total, wp_functional, wp_nonfunctional, unknown, asp=1, ncol=2)"
   }
 ]

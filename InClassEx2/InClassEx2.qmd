@@ -12,6 +12,7 @@ pacman::p_load(sf, tidyverse, tmap, spdep, funModeling)
 ## Importing Geospatial Data
 
 ```{r}
+#| eval: false
 wp <- st_read(dsn = "geodata",
               layer = "geo_export",
               crs = 4326) %>%
@@ -19,12 +20,14 @@ wp <- st_read(dsn = "geodata",
 ```
 
 ```{r}
+#| eval: false
 write_rds(wp, "geodata/wp_nga.rds")
 ```
 
 Importing Nigeria LGA boundary data
 
 ```{r}
+#| eval: false
 nga <- st_read(dsn = "geodata",
                layer = "NGA",
                crs = 4326)
@@ -35,6 +38,7 @@ nga <- st_read(dsn = "geodata",
 ### Recoding NA values into string
 
 ```{r}
+#| eval: false
 wp_nga <- read_rds("geodata/wp_nga.rds") %>%
     mutate(status_cle = replace_na(status_cle, "Unknown"))
 ```
@@ -42,6 +46,7 @@ wp_nga <- read_rds("geodata/wp_nga.rds") %>%
 ### EDA
 
 ```{r}
+#| eval: false
 freq(data=wp_nga, 
      input = 'status_cle')
 ```
@@ -51,6 +56,7 @@ freq(data=wp_nga,
 ### Extracting functional water point
 
 ```{r}
+#| eval: false
 wpt_functional <- wp_nga %>%
   filter(status_cle %in%
            c("Functional", 
@@ -59,6 +65,7 @@ wpt_functional <- wp_nga %>%
 ```
 
 ```{r}
+#| eval: false
 freq(data=wpt_functional, 
      input = 'status_cle')
 ```
@@ -66,6 +73,7 @@ freq(data=wpt_functional,
 ### Extracting non-functional water point
 
 ```{r}
+#| eval: false
 wpt_nonfunctional <- wp_nga %>%
   filter(status_cle %in%
            c("Abandoned/Decommissioned", 
@@ -76,6 +84,7 @@ wpt_nonfunctional <- wp_nga %>%
 ```
 
 ```{r}
+#| eval: false
 freq(data=wpt_nonfunctional, 
      input = 'status_cle')
 ```
@@ -83,6 +92,7 @@ freq(data=wpt_nonfunctional,
 ### Extracting water point with Unknown class
 
 ```{r}
+#| eval: false
 wpt_unknown <- wp_nga %>%
   filter(status_cle == "Unknown")
 ```
@@ -90,6 +100,7 @@ wpt_unknown <- wp_nga %>%
 ## Performing Point-in-Polygon Count
 
 ```{r}
+#| eval: false
 nga_wp <- nga %>% 
   mutate(`total wpt` = lengths(
     st_intersects(nga, wp_nga))) %>%
@@ -104,12 +115,25 @@ nga_wp <- nga %>%
 ## Saving the Analytical Data Table
 
 ```{r}
+#| eval: false
 nga_wp <- nga_wp %>%
   mutate(pct_functional = `wpt functional`/`total wpt`) %>%
-  mutate(`pct_non-functional` = `wpt non-functional`/`total wpt`) %>%
-  select(3:4, 9:10)
+  mutate(`pct_non-functional` = `wpt non-functional`/`total wpt`)
 ```
 
 ```{r}
+#| eval: false
 write_rds(nga_wp, "geodata/nga_wp.rds")
+```
+
+## Visualising the spatial distribution of water points
+
+```{r}
+nga_wp <- read_rds("geodata/nga_wp.rds")
+total <- qtm(nga_wp, "total wpt")
+wp_functional <- qtm(nga_wp, "wpt functional")
+wp_nonfunctional <- qtm(nga_wp, "wpt non-functional")
+unknown <- qtm(nga_wp, "wpt unknown")
+
+tmap_arrange(total, wp_functional, wp_nonfunctional, unknown, asp=1, ncol=2)
 ```
