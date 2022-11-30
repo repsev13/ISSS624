@@ -1015,7 +1015,7 @@ tm_shape prior to each of them).</code></pre>
 <p><img src="TakeHomeEx1_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>The LISA map indicates that the areas with functional water points strongly colored regions are therefore those that contribute significantly to a positive global spatial autocorrelation outcome, while paler colors contribute significantly to a negative autocorrelation outcome</p>
+<p>The LISA map indicates that the areas with a high number of functional water points do not have neighboring regions that also have high number of water points. However, the areas with a high number of non-functioning water points have neighboring regions with a high number of non-functioning water points as well.</p>
 </section>
 </section>
 <section id="hot-spot-and-cold-spot-area-analysis" class="level2">
@@ -1041,6 +1041,7 @@ tm_shape prior to each of them).</code></pre>
   2.662  12.815  20.242  22.031  27.706  71.661 </code></pre>
 </div>
 </div>
+<p>The summary report shows that the largest first nearest neighbour distance is 71.66 km, so using this as the upper threshold gives certainty that all units will have at least one neighbour.</p>
 </section>
 <section id="computing-fixed-distance-weight-matrix" class="level4">
 <h4 class="anchored" data-anchor-id="computing-fixed-distance-weight-matrix">Computing Fixed Distance Weight Matrix</h4>
@@ -1604,6 +1605,7 @@ Variable(s) "gstat_fixed" contains positive and negative values, so midpoint is 
 <p><img src="TakeHomeEx1_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>This show that north and central Nigeria has the largest number of hot spots for functional water points whereas the hot spots for non-functional water points are in the central-west of Nigeria.</p>
 </section>
 <section id="mapping-gi-values-with-adaptive-distance-weights" class="level3">
 <h3 class="anchored" data-anchor-id="mapping-gi-values-with-adaptive-distance-weights">Mapping Gi Values with Adaptive Distance Weights</h3>
@@ -1648,6 +1650,7 @@ Variable(s) "gstat_adaptive" contains positive and negative values, so midpoint 
 <p><img src="TakeHomeEx1_files/figure-html/unnamed-chunk-40-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>By using the adaptive distance-weights, it is clear that although the hot spot for functional water points did not change much, the areas that are cold spots for functional water points have become more evident (specifically, the corners of Nigeria). For non-functional water points, the hot spots for non-functional water points have also become more evident, with central Nigeria having the most hot spots for non-functional water points. It is also interesting to note that the northeast and south of Nigeria are cold spots for both functional and non-functional water points. As such, it could mean that the status of most water points in those areas may be unknown.</p>
 
 
 </section>
