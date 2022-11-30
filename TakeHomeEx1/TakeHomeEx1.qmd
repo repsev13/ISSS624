@@ -1,0 +1,663 @@
+---
+title: "Take Home Exercise 1"
+editor: visual
+---
+
+## Overview
+
+Developing countries, like Nigeria, are most affected by water shortages and poor water quality. Up to 80% of illnesses in the developing world are linked to inadequate water and sanitation. Despite technological advancement, providing clean water to the rural community is still a major development issues in many countries globally, especially countries in the Africa continent.
+
+To address the issue of providing clean and sustainable water supply to the Nigerian rural community, a global Water Point Data Exchange (WPdx) project has been initiated. The main aim of this initiative is to collect water point related data from rural areas in Nigeria at the water point or small water scheme level.
+
+## Getting Started
+
+### Packages Used
+
+The R packages used for the analysis are as follows:
+
+-   sf - used for importing, managing, and processing geospatial data
+
+-   tidyverse - a collection of packages for data science tasks
+
+-   tmap - used for creating thematic maps, such as choropleth and bubble maps
+
+-   spdep - collection of functions to create spatial weights matrix objects from polygon 'contiguities'
+
+-   funModeling - used to analyze data when we need to reduce variable cardinality in predictive modeling
+
+```{r}
+pacman::p_load(sf, tidyverse, tmap, spdep, funModeling)
+```
+
+### Datasets Used
+
+| Type       | Name                                                                                                                         | Format    | Description                         |
+|-----------|----------------------------------------|-----------|-----------|
+| Aspatial   | [WPdx Global Data Repositories](https://data.waterpointdata.org/dataset/Water-Point-Data-Exchange-Plus-WPdx-/eqje-vguj/data) | Shapefile | Water Point Data                    |
+| Geospatial | [geoBoundaries](https://www.geoboundaries.org/)                                                                              | Shapefile | Political Administrative Boundaries |
+
+## Importing Data
+
+Two datasets will be usedm namely, geo_export and nga.
+
+### Importing water point geospatial data
+
+```{r}
+#| eval: false
+wp <- st_read(dsn = "geodata",
+              layer = "geo_export",
+              crs = 4326) %>%
+  filter(clean_coun == "Nigeria")
+```
+
+From the output message, we learn that:
+
+-   Geometry type is point
+
+-   293223 features, 72 fields
+
+-   Assigned CRS is WGS 84, the 'World Geodetic System 1984'
+
+```{r}
+#| eval: false
+write_rds(wp, "geodata/wp_nga.rds")
+```
+
+The extracted data table, wp, has been saved in rds data format as wp_nga.rds.
+
+### Importing Nigeria LGA boundary data
+
+```{r}
+#| eval: false
+nga <- st_read(dsn = "geodata",
+               layer = "NGA",
+               crs = 4326)
+```
+
+From the output message, we learn that:
+
+-   Geometry type is multipolygon
+
+-   774 features, 5 fields
+
+-   Assigned CRS is WGS 84, the 'World Geodetic System 1984'
+
+## Data Wrangling
+
+### Recoding NA values into string
+
+```{r}
+#| eval: false
+wp_nga <- read_rds("geodata/wp_nga.rds") %>%
+    mutate(status_cle = replace_na(status_cle, "Unknown"))
+```
+
+All "NA" values in status_cle field has been recoded into "Unknown"
+
+### Exploratory Data Analysis
+
+```{r}
+#| eval: false
+freq(data=wp_nga, 
+     input = 'status_cle')
+```
+
+The status of all water points in Nigeria are displayed above.
+
+## Extracting Water Point Data
+
+### Extracting functional water point
+
+```{r}
+#| eval: false
+wpt_functional <- wp_nga %>%
+  filter(status_cle %in%
+           c("Functional", 
+             "Functional but not in use",
+             "Functional but needs repair"))
+```
+
+```{r}
+#| eval: false
+freq(data=wpt_functional, 
+     input = 'status_cle')
+```
+
+The status of all functional water points in Nigeria are extracted and displayed above.
+
+### Extracting non-functional water point
+
+```{r}
+#| eval: false
+wpt_nonfunctional <- wp_nga %>%
+  filter(status_cle %in%
+           c("Abandoned/Decommissioned", 
+             "Abandoned",
+             "Non-Functional",
+             "Non functional due to dry season",
+             "Non-Functional due to dry season"))
+```
+
+```{r}
+#| eval: false
+freq(data=wpt_nonfunctional, 
+     input = 'status_cle')
+```
+
+The status of all non-functional water points in Nigeria are extracted and displayed above.
+
+### Extracting water point with Unknown class
+
+```{r}
+#| eval: false
+wpt_unknown <- wp_nga %>%
+  filter(status_cle == "Unknown")
+```
+
+The status of all water points with unknown status in Nigeria are extracted.
+
+## Performing Point-in-Polygon Count
+
+```{r}
+#| eval: false
+nga_wp <- nga %>% 
+  mutate(`total wpt` = lengths(
+    st_intersects(nga, wp_nga))) %>%
+  mutate(`wpt functional` = lengths(
+    st_intersects(nga, wpt_functional))) %>%
+  mutate(`wpt non-functional` = lengths(
+    st_intersects(nga, wpt_nonfunctional))) %>%
+  mutate(`wpt unknown` = lengths(
+    st_intersects(nga, wpt_unknown)))
+```
+
+The intersections for the various water points are mapped as shown above
+
+## Saving the Analytical Data Table
+
+```{r}
+#| eval: false
+nga_wp <- nga_wp %>%
+  mutate(pct_functional = `wpt functional`/`total wpt`) %>%
+  mutate(`pct_non-functional` = `wpt non-functional`/`total wpt`)
+```
+
+```{r}
+#| eval: false
+write_rds(nga_wp, "geodata/nga_wp.rds")
+```
+
+The extracted data table, nga_wp, has been saved in rds data format as nga_wp.rds with pct_functional and pct_non-functional fields.
+
+## Visualising the spatial distribution of water points
+
+```{r}
+nga_wp <- read_rds("geodata/nga_wp.rds")
+
+wp_functional <- qtm(nga_wp, "wpt functional")+
+  tm_layout(legend.outside = FALSE,
+            legend.stack = "vertical",
+            legend.text.size =0.5,
+            legend.title.size=0.5)
+
+wp_nonfunctional <- qtm(nga_wp, "wpt non-functional")+
+  tm_layout(legend.outside = FALSE,
+            legend.stack = "vertical",
+            legend.text.size =0.5,
+            legend.title.size=0.5)
+
+tmap_arrange(wp_functional, wp_nonfunctional, asp=1, ncol=2)
+
+```
+
+## Global Spatial Autocorrelation
+
+### Computing Contiguity Spatial Weights
+
+```{r}
+qcwm = poly2nb(nga_wp, 
+               queen=TRUE)
+summary(qcwm)
+```
+
+The summary report above shows that there are 774 area units in Nigeria. The most connected area unit has 14 neighbours and one area unit with no neighbours.
+
+### Row-standardised weights matrix
+
+```{r}
+set.ZeroPolicyOption(TRUE)
+
+rswm_q <- nb2listw(qcwm, 
+                   style="W", 
+                   zero.policy = TRUE)
+rswm_q
+```
+
+### Moran's I Test 
+
+```{r}
+moran.test(nga_wp$'wpt functional', 
+           listw=rswm_q, 
+           zero.policy = TRUE, 
+           na.action=na.omit)
+
+moran.test(nga_wp$'wpt non-functional', 
+           listw=rswm_q, 
+           zero.policy = TRUE, 
+           na.action=na.omit)
+```
+
+The Moran's I test for functional and non-functional water points show that water points are clustered with functional water points being clustered closer together than the non-functional ones.
+
+### Geary's C Test 
+
+```{r}
+geary.test(nga_wp$'wpt functional', listw=rswm_q)
+
+geary.test(nga_wp$'wpt non-functional', listw=rswm_q)
+```
+
+The Geary's C Test confirms that water points in Nigeria are clustered with functional water points being clustered closer together than the non-functional ones.
+
+## Spatial Correlogram
+
+Moran's I correlogram and plot
+
+```{r}
+MI_corr_f <- sp.correlogram(qcwm, 
+                          nga_wp$'wpt functional', 
+                          order=6, 
+                          method="I", 
+                          style="W")
+plot(MI_corr_f)
+
+MI_corr_nf <- sp.correlogram(qcwm, 
+                          nga_wp$'wpt non-functional', 
+                          order=6, 
+                          method="I", 
+                          style="W")
+plot(MI_corr_nf)
+```
+
+By plotting the output might not allow us to provide complete interpretation. This is because not all autocorrelation values are statistically significant. Hence, it is important for us to examine the full analysis report by printing out the analysis results as in the code chunk below.
+
+```{r}
+print(MI_corr_f)
+
+print(MI_corr_nf)
+```
+
+This shows that both functional and non-functional water points are not correlated when distance is increased as the results are statistically significant.
+
+### Geary's C correlogram and plot
+
+```{r}
+GC_corr_f <- sp.correlogram(qcwm, 
+                            nga_wp$'wpt functional', 
+                            order=6, 
+                            method="C", 
+                            style="W")
+plot(GC_corr_f)
+
+GC_corr_nf <- sp.correlogram(qcwm, 
+                            nga_wp$'wpt non-functional', 
+                            order=6, 
+                            method="C", 
+                            style="W")
+plot(GC_corr_nf)
+```
+
+```{r}
+print(GC_corr_f)
+print(GC_corr_nf)
+```
+
+Given that the results are statistically significant, this further proves that both functional and non-functional water points are not correlated as Moran's I and Geary's C measures are inversely related.
+
+## Cluster and Outlier Analysis
+
+### Computing Local Moran's I
+
+```{r}
+fips <- order(nga_wp$shapeName)
+localMIf <- localmoran(nga_wp$'wpt functional', rswm_q)
+head(localMIf)
+
+fips <- order(nga_wp$shapeName)
+localMInf <- localmoran(nga_wp$'wpt non-functional', rswm_q)
+head(localMInf)
+```
+
+### Mapping Local Moran's I
+
+```{r}
+nga_wp.localMIf <- cbind(nga_wp,localMIf) %>%
+  rename(Pr.Ii = Pr.z....E.Ii..)
+tm_shape(nga_wp.localMIf) +
+  tm_fill(col = "Ii", 
+          style = "pretty",
+          palette = "RdBu",
+          title = "functional wp local moran statistics") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(legend.text.size = 0.5)
+
+nga_wp.localMInf <- cbind(nga_wp,localMInf) %>%
+  rename(Pr.Ii = Pr.z....E.Ii..)
+tm_shape(nga_wp.localMInf) +
+  tm_fill(col = "Ii", 
+          style = "pretty",
+          palette = "RdBu",
+          title = "non-functional wp local moran statistics") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(legend.text.size = 0.5)
+```
+
+### Mapping Local Moran's I p-values
+
+```{r}
+tm_shape(nga_wp.localMIf) +
+  tm_fill(col = "Pr.Ii", 
+          breaks=c(-Inf, 0.001, 0.01, 0.05, 0.1, Inf),
+          palette="-Blues", 
+          title = "functional wp local Moran's I p-values") +
+  tm_borders(alpha = 0.5)+
+  tm_layout(legend.text.size = 0.5)
+
+tm_shape(nga_wp.localMInf) +
+  tm_fill(col = "Pr.Ii", 
+          breaks=c(-Inf, 0.001, 0.01, 0.05, 0.1, Inf),
+          palette="-Blues", 
+          title = "non-functional wp local Moran's I p-values") +
+  tm_borders(alpha = 0.5)+
+  tm_layout(legend.text.size = 0.5)
+```
+
+### Mapping both local Moran's I values and p-values
+
+```{r}
+localMIf.map <- tm_shape(nga_wp.localMIf) +
+  tm_fill(col = "Ii", 
+          style = "pretty", 
+          title = "functional wp local moran statistics") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(legend.text.size = 0.3, legend.title.size = 0.4)
+
+localMInf.map <- tm_shape(nga_wp.localMInf) +
+  tm_fill(col = "Ii", 
+          style = "pretty", 
+          title = "non-functional wplocal moran statistics") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(legend.text.size = 0.25, legend.title.size = 0.4)
+
+pvaluef.map <- tm_shape(nga_wp.localMIf) +
+  tm_fill(col = "Pr.Ii", 
+          breaks=c(-Inf, 0.001, 0.01, 0.05, 0.1, Inf),
+          palette="-Blues", 
+          title = "functional wplocal Moran's I p-values") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(legend.text.size = 0.3, legend.title.size = 0.4)
+
+pvaluenf.map <- tm_shape(nga_wp.localMInf) +
+  tm_fill(col = "Pr.Ii", 
+          breaks=c(-Inf, 0.001, 0.01, 0.05, 0.1, Inf),
+          palette="-Blues", 
+          title = "non-functional wp local Moran's I p-values") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(legend.text.size = 0.3, legend.title.size = 0.4)
+
+tmap_arrange(localMIf.map, localMInf.map, pvaluef.map, pvaluenf.map, asp=1, ncol=2)
+```
+
+Portions indicated in darker green indicates that the functional and non-functional water points in Nigeria have similarly high and low attribute values accordingly.
+
+## LISA Cluster Map
+
+### Moran Scatterplot
+
+```{r}
+nga_wp$fwpt <- scale(nga_wp$'wpt functional') %>% 
+  as.vector 
+
+nci <- moran.plot(nga_wp$fwpt, rswm_q,
+                  labels=as.character(nga_wp$shapeName), 
+                  xlab="wpt functional 2020", 
+                  ylab="Spatially Lag wpt functional 2020")
+
+nga_wp$nfwpt <- scale(nga_wp$'wpt non-functional') %>% 
+  as.vector 
+
+nci <- moran.plot(nga_wp$nfwpt, rswm_q,
+                  labels=as.character(nga_wp$shapeName), 
+                  xlab="wpt non-functional 2020", 
+                  ylab="Spatially Lag wpt non-functional 2020")
+```
+
+The above indicates the areas with higher and lower number of water points that are surrounded by average number of water points in Nigeria respectively.
+
+### Preparing LISA map classes
+
+```{r}
+quadrantf <- vector(mode="numeric",length=nrow(localMIf))
+nga_wp$lag_fwpt <- lag.listw(rswm_q, nga_wp$'wpt functional')
+DV <- nga_wp$lag_fwpt - mean(nga_wp$lag_fwpt)     
+LM_If <- localMIf[,1]   
+signif <- 0.05       
+quadrantf[DV <0 & LM_If>0] <- 1
+quadrantf[DV >0 & LM_If<0] <- 2
+quadrantf[DV <0 & LM_If<0] <- 3  
+quadrantf[DV >0 & LM_If>0] <- 4    
+quadrantf[localMIf[,5]>signif] <- 0
+
+quadrantnf <- vector(mode="numeric",length=nrow(localMInf))
+nga_wp$lag_nfwpt <- lag.listw(rswm_q, nga_wp$'wpt non-functional')
+DV <- nga_wp$lag_nfwpt - mean(nga_wp$lag_nfwpt)     
+LM_Inf <- localMInf[,1]   
+signif <- 0.05       
+quadrantnf[DV <0 & LM_Inf>0] <- 1
+quadrantnf[DV >0 & LM_Inf<0] <- 2
+quadrantnf[DV <0 & LM_Inf<0] <- 3  
+quadrantnf[DV >0 & LM_Inf>0] <- 4    
+quadrantnf[localMInf[,5]>signif] <- 0
+```
+
+### Plotting LISA map
+
+```{r}
+nga_wp.localMIf$quadrantf <- quadrantf
+colors <- c("#ffffff", "#2c7bb6", "#abd9e9", "#fdae61", "#d7191c")
+clusters <- c("insignificant", "low-low", "low-high", "high-low", "high-high")
+
+tm_shape(nga_wp.localMIf) +
+  tm_fill(col = "quadrantf", 
+          style = "cat", 
+          title = "functional wp quadrant",
+          palette = colors[c(sort(unique(quadrantf)))+1], 
+          labels = clusters[c(sort(unique(quadrantf)))+1],
+          popup.vars = c("")) +
+  tm_view(set.zoom.limits = c(11,17)) +
+  tm_borders(alpha=0.5)
+
+nga_wp.localMInf$quadrantnf <- quadrantnf
+colors <- c("#ffffff", "#2c7bb6", "#abd9e9", "#fdae61", "#d7191c")
+clusters <- c("insignificant", "low-low", "low-high", "high-low", "high-high")
+
+tm_shape(nga_wp.localMInf) +
+  tm_fill(col = "quadrantnf", 
+          style = "cat", 
+          title = "non-functional wp quadrant",
+          palette = colors[c(sort(unique(quadrantnf)))+1], 
+          labels = clusters[c(sort(unique(quadrantnf)))+1],
+          popup.vars = c("")) +
+  tm_view(set.zoom.limits = c(11,17)) +
+  tm_borders(alpha=0.5)
+```
+
+```{r}
+fwpt <- qtm(nga_wp, "wpt functional") +
+  tm_fill(title = "functional wpt") +
+  tm_layout(legend.text.size = 0.3, legend.title.size = 0.5)
+
+nga_wp.localMIf$quadrantf <- quadrantf
+colors <- c("#ffffff", "#2c7bb6", "#abd9e9", "#fdae61", "#d7191c")
+clusters <- c("insignificant", "low-low", "low-high", "high-low", "high-high")
+
+LISAmapf <- tm_shape(nga_wp.localMIf) +
+  tm_fill(col = "quadrantf", 
+          style = "cat", 
+          title = "functional wp quadrant",
+          palette = colors[c(sort(unique(quadrantf)))+1], 
+          labels = clusters[c(sort(unique(quadrantf)))+1],
+          popup.vars = c("")) +
+  tm_view(set.zoom.limits = c(11,17)) +
+  tm_borders(alpha=0.5) + 
+  tm_layout(legend.text.size = 0.3)
+
+nfwpt <- qtm(nga_wp, "wpt non-functional") +
+  tm_fill(title = "non-functional wpt") +
+  tm_layout(legend.text.size = 0.25, legend.title.size = 0.4)
+
+nga_wp.localMInf$quadrantnf <- quadrantnf
+colors <- c("#ffffff", "#2c7bb6", "#abd9e9", "#fdae61", "#d7191c")
+clusters <- c("insignificant", "low-low", "low-high", "high-low", "high-high")
+
+LISAmapnf <- tm_shape(nga_wp.localMInf) +
+  tm_fill(col = "quadrantnf", 
+          style = "cat", 
+          title = "non-functional wp quadrant",
+          palette = colors[c(sort(unique(quadrantnf)))+1], 
+          labels = clusters[c(sort(unique(quadrantnf)))+1],
+          popup.vars = c("")) +
+  tm_view(set.zoom.limits = c(11,17)) +
+  tm_borders(alpha=0.5) + 
+  tm_layout(legend.text.size = 0.3)
+
+tmap_arrange(fwpt, LISAmapf, nfwpt, LISAmapnf, asp=1, ncol=2)
+```
+
+The LISA map indicates that the areas with functional water points strongly colored regions are therefore those that contribute significantly to a positive global spatial autocorrelation outcome, while paler colors contribute significantly to a negative autocorrelation outcome
+
+## Hot Spot and Cold Spot Area Analysis
+
+### Deriving Distance-Based Weight Matrix
+
+#### Deriving the Centroid
+
+```{r}
+longitude <- map_dbl(nga_wp$geometry, ~st_centroid(.x)[[1]])
+latitude <- map_dbl(nga_wp$geometry, ~st_centroid(.x)[[2]])
+coords <- cbind(longitude, latitude)
+```
+
+#### Determine the Cut-Off Distance
+
+```{r}
+k1 <- knn2nb(knearneigh(coords))
+k1dists <- unlist(nbdists(k1, coords, longlat = TRUE))
+summary(k1dists)
+```
+
+#### Computing Fixed Distance Weight Matrix
+
+```{r}
+wm_d62 <- dnearneigh(coords, 0, 72, longlat = TRUE)
+wm_d62
+```
+
+```{r}
+wm62_lw <- nb2listw(wm_d62, style = 'B')
+summary(wm62_lw)
+```
+
+#### Computing Adaptive Distance Weight Matrix
+
+```{r}
+knn <- knn2nb(knearneigh(coords, k=30))
+knn_lw <- nb2listw(knn, style = 'B')
+summary(knn_lw)
+```
+
+## Computing Gi Statistics
+
+### Gi Statistics Using Fixed Distance
+
+```{r}
+fips <- order(nga_wp$shapeName)
+gi.fixedf <- localG(nga_wp$'wpt functional', wm62_lw)
+gi.fixedf
+
+gi.fixednf <- localG(nga_wp$'wpt non-functional', wm62_lw)
+gi.fixednf
+```
+
+```{r}
+nga_wp.gif <- cbind(nga_wp, as.matrix(gi.fixedf)) %>%
+  rename(gstat_fixed = as.matrix.gi.fixedf.)
+
+nga_wp.ginf <- cbind(nga_wp, as.matrix(gi.fixednf)) %>%
+  rename(gstat_fixed = as.matrix.gi.fixednf.)
+```
+
+### Mapping Gi Values with Fixed Distance Weights
+
+```{r}
+fwpt <- qtm(nga_wp, "wpt functional") +
+      tm_layout(legend.text.size = 0.3)
+
+Gimapf <-tm_shape(nga_wp.gif) +
+  tm_fill(col = "gstat_fixed", 
+          style = "pretty",
+          palette="-RdBu",
+          title = "functional wp local Gi") +
+  tm_layout(legend.text.size = 0.3) +
+  tm_borders(alpha = 0.5)
+
+nfwpt <- qtm(nga_wp, "wpt non-functional") +
+  tm_layout(legend.text.size = 0.25)
+
+Gimapnf <-tm_shape(nga_wp.ginf) +
+  tm_fill(col = "gstat_fixed", 
+          style = "pretty",
+          palette="-RdBu",
+          title = "non-functional wp local Gi") +
+  tm_layout(legend.text.size = 0.25) +
+  tm_borders(alpha = 0.5)
+
+tmap_arrange(fwpt, Gimapf, nfwpt, Gimapnf, asp=1, ncol=2)
+```
+
+### Mapping Gi Values with Adaptive Distance Weights
+
+```{r}
+fips <- order(nga_wp$shapeName)
+gif.adaptive <- localG(nga_wp$'wpt functional', knn_lw)
+nga_wp.gif <- cbind(nga_wp, as.matrix(gif.adaptive)) %>%
+  rename(gstat_adaptive = as.matrix.gif.adaptive.)
+
+ginf.adaptive <- localG(nga_wp$'wpt non-functional', knn_lw)
+nga_wp.ginf <- cbind(nga_wp, as.matrix(ginf.adaptive)) %>%
+  rename(gstat_adaptive = as.matrix.ginf.adaptive.)
+
+fwpt <- qtm(nga_wp, "wpt functional") +
+      tm_layout(legend.text.size = 0.3)
+
+Gimapf <-tm_shape(nga_wp.gif) +
+  tm_fill(col = "gstat_adaptive", 
+          style = "pretty",
+          palette="-RdBu",
+          title = "functional wp local Gi") +
+  tm_layout(legend.text.size = 0.3) +
+  tm_borders(alpha = 0.5)
+
+nfwpt <- qtm(nga_wp, "wpt non-functional") +
+  tm_layout(legend.text.size = 0.25)
+
+Gimapnf <-tm_shape(nga_wp.ginf) +
+  tm_fill(col = "gstat_adaptive", 
+          style = "pretty",
+          palette="-RdBu",
+          title = "non-functional wp local Gi") +
+  tm_layout(legend.text.size = 0.25) +
+  tm_borders(alpha = 0.5)
+
+tmap_arrange(fwpt, Gimapf, nfwpt, Gimapnf, asp=1, ncol=2)
+```

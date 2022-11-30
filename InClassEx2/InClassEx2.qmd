@@ -19,12 +19,14 @@ wp <- st_read(dsn = "geodata",
   filter(clean_coun == "Nigeria")
 ```
 
+### Importing water point geospatial data
+
 ```{r}
 #| eval: false
 write_rds(wp, "geodata/wp_nga.rds")
 ```
 
-Importing Nigeria LGA boundary data
+### Importing Nigeria LGA boundary data
 
 ```{r}
 #| eval: false
@@ -129,11 +131,33 @@ write_rds(nga_wp, "geodata/nga_wp.rds")
 ## Visualising the spatial distribution of water points
 
 ```{r}
+#| fig-width: 14
+#| fig-height: 12
 nga_wp <- read_rds("geodata/nga_wp.rds")
-total <- qtm(nga_wp, "total wpt")
-wp_functional <- qtm(nga_wp, "wpt functional")
-wp_nonfunctional <- qtm(nga_wp, "wpt non-functional")
-unknown <- qtm(nga_wp, "wpt unknown")
+
+total <- qtm(nga_wp, "total wpt")+
+  tm_layout(legend.outside = FALSE,
+            legend.stack = "vertical",
+            legend.text.size =0.3,
+            legend.title.size=0.4)
+
+wp_functional <- qtm(nga_wp, "wpt functional")+
+  tm_layout(legend.outside = FALSE,
+            legend.stack = "vertical",
+            legend.text.size =0.3,
+            legend.title.size=0.4)
+
+wp_nonfunctional <- qtm(nga_wp, "wpt non-functional")+
+  tm_layout(legend.outside = FALSE,
+            legend.stack = "vertical",
+            legend.text.size =0.3,
+            legend.title.size=0.4)
+
+unknown <- qtm(nga_wp, "wpt unknown")+
+  tm_layout(legend.outside = FALSE,
+            legend.stack = "vertical",
+            legend.text.size =0.3,
+            legend.title.size=0.4)
 
 tmap_arrange(total, wp_functional, wp_nonfunctional, unknown, asp=1, ncol=2)
 ```
