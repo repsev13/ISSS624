@@ -550,7 +550,7 @@
     "href": "InClassEx3/InClassEx3.html",
     "title": "In-Class Exercise 3",
     "section": "",
-    "text": "pacman::p_load(rgdal, spdep, tmap, sf, ggpubr, cluster, factoextra, NbClust,\n               heatmaply, corrplot, psych, tidyverse)"
+    "text": "pacman::p_load(rgdal, spdep, tmap, sf, ggpubr, cluster, factoextra, NbClust,\n               heatmaply, corrplot, psych, tidyverse, ClustGeo)"
   },
   {
     "objectID": "InClassEx3/InClassEx3.html#data-import-and-preparation",
@@ -592,6 +592,6 @@
     "href": "InClassEx3/InClassEx3.html#spatially-constrained-clustering---clustgeo-method",
     "title": "In-Class Exercise 3",
     "section": "Spatially Constrained Clustering - ClustGeo Method",
-    "text": "Spatially Constrained Clustering - ClustGeo Method"
+    "text": "Spatially Constrained Clustering - ClustGeo Method\n\nWard-like hierarchical clustering: ClustGeo\n\nnongeo_cluster <- hclustgeo(proxmat)\nplot(nongeo_cluster, cex = 0.5)\nrect.hclust(nongeo_cluster, \n            k = 6, \n            border = 2:5)\n\n\n\n\n\nMapping the clusters formed\n\ngroups <- as.factor(cutree(nongeo_cluster, k=6))\nshan_sf_ngeo_cluster <- cbind(shan_sf, as.matrix(groups)) %>%\n  rename(`CLUSTER` = `as.matrix.groups.`)\nqtm(shan_sf_ngeo_cluster, \"CLUSTER\")\n\n\n\n\n\n\n\nSpatially Constrained Hierarchical Clustering\n\ndist <- st_distance(shan_sf, shan_sf)\ndistmat <- as.dist(dist)\n\ncr <- choicealpha(proxmat, distmat, range.alpha = seq(0, 1, 0.1), K=6, graph = TRUE)\n\n\n\n\n\n\n\n\nclustG <- hclustgeo(proxmat, distmat, alpha = 0.3)\ngroups <- as.factor(cutree(clustG, k=6))\nshan_sf_Gcluster <- cbind(shan_sf, as.matrix(groups)) %>%\n  rename(`CLUSTER` = `as.matrix.groups.`)\nqtm(shan_sf_Gcluster, \"CLUSTER\")"
   }
 ]
