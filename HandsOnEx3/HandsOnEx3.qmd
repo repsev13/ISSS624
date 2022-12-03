@@ -5,7 +5,7 @@ editor: visual
 
 ## Overview
 
-In this hands-on exercise, I learnt how to delineate homogeneous region by using geographically referenced multivariate data by usuing hierarchical and spatially constrained cluster analysis.
+In this hands-on exercise, I learnt how to delineate homogeneous region by using geographically referenced multivariate data by using hierarchical and spatially constrained cluster analysis.
 
 ## Getting Started
 
@@ -257,7 +257,7 @@ describe(shan_ict.z)
 
 ### Visualising the Standardised Clustering Variables
 
-Visualisations of the clustering variables areshown below.
+Visualisations of the clustering variables are shown below.
 
 ```{r}
 r <- ggplot(data=ict_derived, 

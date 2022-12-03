@@ -32,7 +32,7 @@ pacman::p_load(sf, tidyverse, tmap, spdep, funModeling)
 ### Datasets Used
 
 | Type       | Name                                                                                                                         | Format    | Description                         |
-|-----------|----------------------------------------|-----------|-----------|
+|------------|------------------------------------------------------------------------------------------------------------------------------|-----------|-------------------------------------|
 | Aspatial   | [WPdx Global Data Repositories](https://data.waterpointdata.org/dataset/Water-Point-Data-Exchange-Plus-WPdx-/eqje-vguj/data) | Shapefile | Water Point Data                    |
 | Geospatial | [geoBoundaries](https://www.geoboundaries.org/)                                                                              | Shapefile | Political Administrative Boundaries |
 
@@ -233,7 +233,7 @@ rswm_q <- nb2listw(qcwm,
 rswm_q
 ```
 
-### Moran's I Test 
+### Moran's I Test
 
 ```{r}
 moran.test(nga_wp$'wpt functional', 
@@ -249,7 +249,7 @@ moran.test(nga_wp$'wpt non-functional',
 
 The Moran's I test for functional and non-functional water points show that water points are clustered with functional water points being clustered closer together than the non-functional ones.
 
-### Geary's C Test 
+### Geary's C Test
 
 ```{r}
 geary.test(nga_wp$'wpt functional', listw=rswm_q)

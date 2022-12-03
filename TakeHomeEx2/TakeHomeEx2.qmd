@@ -1,0 +1,186 @@
+---
+title: "Take-Home Exercise 2"
+editor: visual
+---
+
+## Overview
+
+## Getting Started
+
+### Packages Used
+
+The R packages used for the analysis are as follows:
+
+-   sf - used for importing, managing, and processing geospatial data
+
+-   tidyverse - a collection of packages for data science tasks
+
+-   tmap - used for creating thematic maps, such as choropleth and bubble maps
+
+-   spdep - collection of functions to create spatial weights matrix objects from polygon 'contiguities'
+
+-   funModeling - used to analyze data when we need to reduce variable cardinality in predictive modeling
+
+```{r}
+pacman::p_load(sf, tidyverse, tmap, spdep, funModeling)
+```
+
+### Datasets Used
+
+| Type       | Name                                                                                                                         | Format    | Description                         |
+|--------------|-----------------------------|--------------|--------------|
+| Aspatial   | [WPdx Global Data Repositories](https://data.waterpointdata.org/dataset/Water-Point-Data-Exchange-Plus-WPdx-/eqje-vguj/data) | Shapefile | Water Point Data                    |
+| Geospatial | [geoBoundaries](https://www.geoboundaries.org/)                                                                              | Shapefile | Political Administrative Boundaries |
+
+## Importing Data
+
+Two datasets will be usedm namely, geo_export and nga.
+
+### Importing water point geospatial data
+
+```{r}
+#| eval: false
+wp <- st_read(dsn = "geodata",
+              layer = "geo_export",
+              crs = 4326) %>%
+  filter(clean_coun == "Nigeria")
+```
+
+From the output message, we learn that:
+
+-   Geometry type is point
+
+-   293223 features, 72 fields
+
+-   Assigned CRS is WGS 84, the 'World Geodetic System 1984'
+
+```{r}
+#| eval: false
+write_rds(wp, "geodata/wp_nga.rds")
+```
+
+The extracted data table, wp, has been saved in rds data format as wp_nga.rds.
+
+### Importing Nigeria LGA boundary data
+
+```{r}
+#| eval: false
+nga <- st_read(dsn = "geodata",
+               layer = "NGA",
+               crs = 4326)
+```
+
+From the output message, we learn that:
+
+-   Geometry type is multipolygon
+
+-   774 features, 5 fields
+
+-   Assigned CRS is WGS 84, the 'World Geodetic System 1984'
+
+## Data Wrangling
+
+### Recoding NA values into string
+
+```{r}
+#| eval: false
+wp_nga <- read_rds("geodata/wp_nga.rds") %>%
+    mutate(status_cle = replace_na(status_cle, "Unknown"))
+```
+
+All "NA" values in status_cle field has been recoded into "Unknown"
+
+### Exploratory Data Analysis
+
+```{r}
+#| eval: false
+freq(data=wp_nga, 
+     input = 'status_cle')
+```
+
+The status of all water points in Nigeria are displayed above.
+
+## Extracting Water Point Data
+
+### Extracting functional water point
+
+```{r}
+#| eval: false
+wpt_functional <- wp_nga %>%
+  filter(status_cle %in%
+           c("Functional", 
+             "Functional but not in use",
+             "Functional but needs repair"))
+```
+
+```{r}
+#| eval: false
+freq(data=wpt_functional, 
+     input = 'status_cle')
+```
+
+The status of all functional water points in Nigeria are extracted and displayed above.
+
+### Extracting non-functional water point
+
+```{r}
+#| eval: false
+wpt_nonfunctional <- wp_nga %>%
+  filter(status_cle %in%
+           c("Abandoned/Decommissioned", 
+             "Abandoned",
+             "Non-Functional",
+             "Non functional due to dry season",
+             "Non-Functional due to dry season"))
+```
+
+```{r}
+#| eval: false
+freq(data=wpt_nonfunctional, 
+     input = 'status_cle')
+```
+
+The status of all non-functional water points in Nigeria are extracted and displayed above.
+
+### Extracting water point with Unknown class
+
+```{r}
+#| eval: false
+wpt_unknown <- wp_nga %>%
+  filter(status_cle == "Unknown")
+```
+
+The status of all water points with unknown status in Nigeria are extracted.
+
+## Performing Point-in-Polygon Count
+
+```{r}
+#| eval: false
+nga_wp <- nga %>% 
+  mutate(`total wpt` = lengths(
+    st_intersects(nga, wp_nga))) %>%
+  mutate(`wpt functional` = lengths(
+    st_intersects(nga, wpt_functional))) %>%
+  mutate(`wpt non-functional` = lengths(
+    st_intersects(nga, wpt_nonfunctional))) %>%
+  mutate(`wpt unknown` = lengths(
+    st_intersects(nga, wpt_unknown)))
+```
+
+The intersections for the various water points are mapped as shown above
+
+## Saving the Analytical Data Table
+
+```{r}
+#| eval: false
+nga_wp <- nga_wp %>%
+  mutate(pct_functional = `wpt functional`/`total wpt`) %>%
+  mutate(`pct_non-functional` = `wpt non-functional`/`total wpt`)
+```
+
+```{r}
+#| eval: false
+write_rds(nga_wp, "geodata/nga_wp.rds")
+```
+
+The extracted data table, nga_wp, has been saved in rds data format as nga_wp.rds with pct_functional and pct_non-functional fields.
