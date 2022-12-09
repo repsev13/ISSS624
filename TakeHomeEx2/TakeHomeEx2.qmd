@@ -184,3 +184,9 @@ write_rds(nga_wp, "geodata/nga_wp.rds")
 ```
 
 The extracted data table, nga_wp, has been saved in rds data format as nga_wp.rds with pct_functional and pct_non-functional fields.
+
+Exploratory Data Analysis using Choropleth Map
+
+```{r}
+qtm(shan_sf, "RADIO_PR")
+```
