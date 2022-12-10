@@ -40,5 +40,14 @@
   },
   "TakeHomeEx2/TakeHomeEx2.qmd": {
     "TakeHomeEx2.html": "762d7d57"
+  },
+  "HandsOnEx4/HandsOnEx4.qmd": {
+    "HandsOnEx4.html": "d5098090"
+<<<<<<< HEAD
+  },
+  "InClassEx4/InClassEx4.qmd": {
+    "InClassEx4.html": "cff0bac4"
+=======
+>>>>>>> 98af7dd5f6f2334ba6d2646df70308e88961c2af
   }
 }
